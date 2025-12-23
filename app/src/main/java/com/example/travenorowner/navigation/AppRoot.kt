@@ -10,13 +10,14 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.travenorowner.features.ownerRequest.OwnerRequestScreen
 import com.example.travenorowner.features.search.SearchScreen
 import kotlinx.serialization.Serializable
 import kotlin.String
 
 
 @Serializable
-data class ChatScreenRoute(val destinationId: String)
+data class OwnerRequestScreenRoute(val destinationName: String, val isActive: Boolean)
 
 @Serializable
 object SearchScreenRoute
@@ -35,6 +36,13 @@ fun AppRoot(
         ) {
             composable<SearchScreenRoute> {
                 SearchScreen(
+                    modifier = modifier.padding(innerPadding),
+                    onNavigateToOwnerRequestScreen = navController::navigateToOwnerRequestScreen
+                )
+            }
+
+            composable<OwnerRequestScreenRoute> {
+                OwnerRequestScreen(
                     modifier = modifier.padding(innerPadding)
                 )
             }
@@ -42,6 +50,6 @@ fun AppRoot(
     }
 }
 
-fun NavController.navigateToChatScreenScreen(destinationId: String) {
-    this.navigate(ChatScreenRoute(destinationId = destinationId))
+fun NavController.navigateToOwnerRequestScreen(destinationId: String, isActive: Boolean) {
+    this.navigate(OwnerRequestScreenRoute(destinationName = destinationId, isActive = isActive))
 }

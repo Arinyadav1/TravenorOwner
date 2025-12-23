@@ -1,4 +1,4 @@
-package com.example.travenorowner.features.Components
+package com.example.travenorowner.features.components
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
