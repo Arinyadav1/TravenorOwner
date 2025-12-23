@@ -6,5 +6,5 @@ import org.koin.dsl.module
 
 val repositoryModule = module {
     singleOf(::DestinationsRepositoryImpl) { bind<DestinationsRepository>() }
-
+    singleOf(::BookingRepositoryImpl) { bind<BookingRepository>() }
 }

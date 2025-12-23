@@ -20,7 +20,9 @@ object AppColors{
     val customWhite = Color(0xFFFFFFFF)
 
     val lightSub = Color(0xFF7D848D)
+    val lightGreen = Color(0xFF19B000)
     val lightGrey = Color(0xFFF7F7F9)
+    val dividerColor = Color(0xFFE5E5EA)
     val error = Color(0xFFba1a1a)
     val grey = Color.Gray
 

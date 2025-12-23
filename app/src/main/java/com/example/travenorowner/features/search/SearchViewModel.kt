@@ -5,7 +5,6 @@ import com.example.travenorowner.data.DestinationsRepository
 import com.example.travenorowner.features.BaseViewModel
 import com.example.travenorowner.features.search.SearchEvent.*
 import com.example.travenorowner.model.Destination
-import io.github.jan.supabase.auth.user.UserInfo
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
@@ -48,7 +47,7 @@ class SearchViewModel(
         when (action) {
             is SearchAction.OnNavigateToDetailScreen -> {
                 sendEvent(
-                    NavigateToDetailScreen(action.destinationName, action.isActive)
+                    NavigateToDetailScreen(action.destinationId)
                 )
             }
 
@@ -77,12 +76,12 @@ data class SearchState(
 )
 
 sealed interface SearchEvent {
-    data class NavigateToDetailScreen(val destinationName: String, val isActive: Boolean) :
+    data class NavigateToDetailScreen(val destinationId: String) :
         SearchEvent
 }
 
 sealed interface SearchAction {
-    data class OnNavigateToDetailScreen(val destinationName: String, val isActive: Boolean) :
+    data class OnNavigateToDetailScreen(val destinationId: String) :
         SearchAction
 
     data class OnSearchQueryChange(val query: String) : SearchAction

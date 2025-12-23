@@ -1,7 +1,6 @@
 package com.example.travenorowner.features.ownerRequest
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,72 +16,86 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.travenorowner.features.components.TravenorIconButton
+import com.example.travenorowner.features.components.TravenorShimmerLoadingOverlay
 import com.example.travenorowner.ui.theme.AppColors
+import com.example.travenorowner.ui.theme.AppTypography
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun OwnerRequestScreen(
     modifier: Modifier = Modifier,
-    title: String = "Kolkata Reservoir",
+    viewModel: OwnerRequestViewModel = koinViewModel()
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(Color.White)
-            .padding(vertical = 10.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+    val state = viewModel.stateFlow.collectAsStateWithLifecycle().value
+
+    Box(
+        modifier = Modifier.fillMaxWidth()
     ) {
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .background(Color.White)
+                .padding(vertical = 10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
-            text = title,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = Color.Black
-        )
+            Text(
+                text = state.destination?.destinationName ?: "",
+                style = AppTypography.titleMediumSfPro,
+            )
 
-        Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
-        // Active status
-        Text(
-            text = "Active Now",
-            fontSize = 12.sp,
-            color = Color(0xFF34C759) // iOS green
-        )
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Active Now",
+                style = AppTypography.bodyLarge,
+                color = AppColors.lightGreen
+            )
 
-        HorizontalDivider(
-            color = Color(0xFFE5E5EA),
-            thickness = 1.dp,
-            modifier = Modifier.fillMaxWidth()
-        )
+            Spacer(modifier = Modifier.height(16.dp))
 
-        Spacer(modifier = Modifier.weight(1f))
+            HorizontalDivider(
+                color = AppColors.dividerColor,
+                thickness = 1.dp,
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        // Request Card
-        RequestCard(
+            Spacer(modifier = Modifier.weight(1f))
 
-        )
+            if (state.isShowRequestCard) {
+                RequestCard(
+                    onAccept = { viewModel.onAction(OwnerRequestAction.AcceptRequest) },
+                    onReject = { viewModel.onAction(OwnerRequestAction.RejectRequest) },
+                    state = state
+                )
+            }
 
-        Spacer(modifier = Modifier.weight(1.2f))
+            Spacer(modifier = Modifier.weight(1.2f))
+        }
+
+        if (state.isLoading) {
+            TravenorShimmerLoadingOverlay()
+        }
     }
 }
 
 @Composable
 fun RequestCard(
-
+    onAccept: () -> Unit,
+    onReject: () -> Unit,
+    state: OwnerRequestState
 ) {
     Column(
         modifier = Modifier
@@ -95,10 +108,18 @@ fun RequestCard(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
+        val status = remember(state.requestCardStatus) {
+            when (state.requestCardStatus) {
+                RequestCardStatus.Accepted -> "Accepted Successfully"
+                RequestCardStatus.Rejected -> "Rejected Successfully"
+                RequestCardStatus.NewRequest -> "New Request from User"
+            }
+        }
+
         Text(
-            text = "New Request from User",
-            fontSize = 13.sp,
-            color = Color.Gray
+            text = status,
+            style = AppTypography.labelLargeRegular,
+            color = AppColors.lightSub
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -108,17 +129,32 @@ fun RequestCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
 
-            TravenorIconButton(
-                icon = Icons.Default.Check,
-                iconTint = AppColors.lightSub,
-                onClick = { }
-            )
+            @Composable
+            fun acceptButton() {
+                TravenorIconButton(
+                    icon = Icons.Default.Check,
+                    iconTint = AppColors.lightSub,
+                    onClick = onAccept
+                )
+            }
 
-            TravenorIconButton(
-                icon = Icons.Default.Close,
-                iconTint = Color.Red,
-                onClick = {}
-            )
+            @Composable
+            fun rejectButton() {
+                TravenorIconButton(
+                    icon = Icons.Default.Close,
+                    iconTint = Color.Red,
+                    onClick = onReject
+                )
+            }
+
+            when (state.requestCardStatus) {
+                RequestCardStatus.Accepted -> acceptButton()
+                RequestCardStatus.Rejected -> rejectButton()
+                RequestCardStatus.NewRequest -> {
+                    acceptButton()
+                    rejectButton()
+                }
+            }
         }
     }
 }

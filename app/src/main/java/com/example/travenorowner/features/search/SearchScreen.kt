@@ -48,7 +48,7 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun SearchScreen(
     modifier: Modifier = Modifier,
-    onNavigateToOwnerRequestScreen: (String, Boolean) -> Unit,
+    onNavigateToOwnerRequestScreen: (String) -> Unit,
     viewModel: SearchViewModel = koinViewModel()
 ) {
     val state = viewModel.stateFlow.collectAsStateWithLifecycle().value
@@ -56,7 +56,7 @@ fun SearchScreen(
         viewModel.event.collect { event ->
             when (event) {
                 is SearchEvent.NavigateToDetailScreen -> onNavigateToOwnerRequestScreen(
-                    event.destinationName, event.isActive
+                    event.destinationId
                 )
             }
         }
@@ -115,10 +115,10 @@ fun SearchScreen(
                     items(state.filterDestination) { destination ->
                         PlaceCard(
                             destination = destination,
-                            onNavigateToOwnerRequestScreen = { destination, isActive ->
+                            onNavigateToOwnerRequestScreen = { destinationId ->
                                 viewModel.onAction(
                                     SearchAction.OnNavigateToDetailScreen(
-                                        destination, isActive
+                                        destinationId
                                     )
                                 )
                             })
@@ -206,7 +206,7 @@ fun SearchBar(
 @Composable
 fun PlaceCard(
     destination: Destination,
-    onNavigateToOwnerRequestScreen: (String, Boolean) -> Unit,
+    onNavigateToOwnerRequestScreen: (String) -> Unit,
 
     ) {
     ElevatedCard(
@@ -224,8 +224,7 @@ fun PlaceCard(
                 indication = null
             ) {
                 onNavigateToOwnerRequestScreen(
-                    destination.destinationName,
-                    destination.isActive
+                    destination.id
                 )
             }
     ) {
