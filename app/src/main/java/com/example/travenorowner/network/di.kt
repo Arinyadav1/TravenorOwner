@@ -1,11 +1,15 @@
 package com.example.travenorowner.network
 
 import android.util.Log
+import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.annotations.SupabaseInternal
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.realtime.Realtime
+import io.github.jan.supabase.realtime.RealtimeChannel
+import io.github.jan.supabase.realtime.channel
+import io.github.jan.supabase.realtime.realtime
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.logging.LogLevel
@@ -17,7 +21,7 @@ import org.koin.dsl.module
 @OptIn(SupabaseInternal::class)
 val networkModule = module {
 
-    single {
+    single<SupabaseClient> {
         createSupabaseClient(
             supabaseUrl = BuildConfig.BASE_URL,
             supabaseKey = BuildConfig.API_KEY
@@ -38,6 +42,10 @@ val networkModule = module {
 
             httpEngine = OkHttp.create {}
         }
+    }
+
+    single<RealtimeChannel> {
+        get<SupabaseClient>().realtime.channel(Constants.BOOKING)
     }
 
 }

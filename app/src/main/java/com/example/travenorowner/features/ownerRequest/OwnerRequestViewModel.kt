@@ -1,5 +1,6 @@
 package com.example.travenorowner.features.ownerRequest
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
@@ -11,9 +12,6 @@ import com.example.travenorowner.model.Destination
 import com.example.travenorowner.model.Status
 import com.example.travenorowner.navigation.OwnerRequestScreenRoute
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -31,6 +29,11 @@ class OwnerRequestViewModel(
     }
 
     private fun getDestination(id: String) {
+        mutableStateFlow.update {
+            it.copy(
+                isLoading = true
+            )
+        }
         viewModelScope.launch {
             destinationsRepository.getDestination(id)
                 .catch {}
@@ -38,6 +41,7 @@ class OwnerRequestViewModel(
                     mutableStateFlow.update {
                         it.copy(
                             destination = data,
+                            isLoading = false
                         )
                     }
                 }
@@ -45,21 +49,23 @@ class OwnerRequestViewModel(
     }
 
     private fun bookingStatus() {
-        bookingRepository.bookingStatus()
-            .onEach { booking ->
-                if (
-                    booking.destinationId == route.destinationId
-                ) {
-                    mutableStateFlow.update {
-                        it.copy(
-                            isShowRequestCard = true,
-                            booking = booking
-                        )
+        viewModelScope.launch {
+            bookingRepository.bookingStatus()
+                ?.catch { }
+                ?.collect { booking ->
+                    if (
+                        booking.destinationId == route.destinationId
+                    ) {
+                        mutableStateFlow.update {
+                            it.copy(
+                                isShowRequestCard = true,
+                                booking = booking
+                            )
+                        }
                     }
                 }
-            }
-            .catch { }
-            .launchIn(viewModelScope)
+
+        }
     }
 
     private fun acceptRejectRequest(status: String) {

@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface BookingRepository {
 
-    fun bookingStatus(): Flow<Booking>
+     suspend fun bookingStatus(): Flow<Booking>?
 
     suspend fun updateStatus(
         bookingId: String,
